@@ -3,7 +3,7 @@ from Agent import Agent
 import torch
 
 class Trainer():
-    def __init__(self, env, episodes=1000, lr1=0.8, lr2=0.8, gamma=0.9):
+    def __init__(self, env, episodes=700, lr1=0.01, lr2=0.001, gamma=0.9):
         self.env = env
         self.episodes = episodes
 
