@@ -15,6 +15,7 @@ class Critic(nn.Module):
     
 class Actor(nn.Module):
     def __init__(self, n_obs, n_act, action_bound):
+        super().__init__()
         self.net = nn.Sequential(
             nn.Linear(n_obs, 64), nn.ReLU(), 
             nn.Linear(64, n_act))

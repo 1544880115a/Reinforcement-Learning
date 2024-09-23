@@ -34,7 +34,7 @@ class Agent():
         return action
     
     def learn_batch(self):
-        batch_obs, batch_reward, batch_next_obs, batch_done = self.rb.sample(self.minibatch_size)
+        batch_obs, batch_action, batch_reward, batch_next_obs, batch_done = self.rb.sample(self.minibatch_size)
 
         #使用Actor目标网络获取下一时刻的action
         batch_next_action = self.target_actor(batch_next_obs)
@@ -50,10 +50,10 @@ class Agent():
         critic_loss.backward()
         self.optimizer1.step()
 
-        #使用Actor训练网络获取当前时刻的action
-        batch_action = self.actor(batch_obs)
+        #使用Actor训练网络获取当前时刻的action(不带噪声的)
+        batch_action_ = self.actor(batch_obs)
         #使用Critic训练网络计算当前(s, a)的q值
-        now_q = self.critic(batch_obs, batch_action)
+        now_q = self.critic(batch_obs, batch_action_)
         #计算损失并对actor训练网络的参数进行更新
         self.optimizer2.zero_grad()
         actor_loss = -torch.mean(now_q)
@@ -69,9 +69,9 @@ class Agent():
                                        self.actor.parameters()):
             target_param.data.copy_(self.tau * param.data + (1 - self.tau) * target_param.data)
 
-    def learn(self, obs, reward, next_obs, done):
+    def learn(self, obs, action, reward, next_obs, done):
         self.global_steps += 1
-        self.rb.append((obs, reward, next_obs, done))
+        self.rb.append((obs, action, reward, next_obs, done))
         if len(self.rb) >= self.replay_start_size and self.global_steps % self.rb.num_steps == 0:
             self.learn_batch()
         if self.global_steps % self.target_update_interval == 0:
