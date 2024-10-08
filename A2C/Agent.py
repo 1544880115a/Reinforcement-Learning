@@ -1,13 +1,13 @@
 import torch
 
 class Agent():
-    def __init__(self, critic, actor, optimizer1, optimizer2, gamma):
+    def __init__(self, critic, actor, critic_optimizer, actor_optimizer, gamma):
         self.critic = critic
-        self.optimizer1 = optimizer1
+        self.critic_optimizer = critic_optimizer
         self.loss = torch.nn.MSELoss()
 
         self.actor = actor
-        self.optimizer2 = optimizer2
+        self.actor_optimizer = actor_optimizer
 
         self.gamma = gamma
 
@@ -28,11 +28,11 @@ class Agent():
         critic_loss = self.loss(predict_v, target_v)
         actor_loss = -log_prob * td_error.detach()
         
-        self.optimizer1.zero_grad()
-        self.optimizer2.zero_grad()
+        self.critic_optimizer.zero_grad()
+        self.actor_optimizer.zero_grad()
 
         critic_loss.backward()
         actor_loss.backward()
 
-        self.optimizer1.step()
-        self.optimizer2.step()
+        self.critic_optimizer.step()
+        self.actor_optimizer.step()

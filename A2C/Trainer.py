@@ -3,7 +3,7 @@ from Agent import Agent
 import torch
 
 class Trainer():
-    def __init__(self, env, episodes=700, lr1=0.01, lr2=0.001, gamma=0.9):
+    def __init__(self, env, episodes=700, critic_lr=0.01, actor_lr=0.001, gamma=0.98):
         self.env = env
         self.episodes = episodes
 
@@ -11,16 +11,16 @@ class Trainer():
         n_act = env.action_space.n
 
         critic = Critic(n_obs)
-        optimizer1 = torch.optim.AdamW(critic.parameters(), lr=lr1)
+        critic_optimizer = torch.optim.AdamW(critic.parameters(), critic_lr)
         actor = Actor(n_obs, n_act)
-        optimizer2 = torch.optim.AdamW(actor.parameters(), lr=lr2)
+        actor_optimizer = torch.optim.AdamW(actor.parameters(), actor_lr)
         
 
         self.agent = Agent(
             critic=critic, 
             actor=actor, 
-            optimizer1=optimizer1, 
-            optimizer2=optimizer2, 
+            critic_optimizer=critic_optimizer, 
+            actor_optimizer=actor_optimizer, 
             gamma=gamma)
     
     def train_episode(self):

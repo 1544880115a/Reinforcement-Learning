@@ -4,7 +4,7 @@ from Modules import Critic, Actor
 import torch
 
 class Trainer():
-    def __init__(self, env, episodes=20, lr1=0.003, lr2=0.0003, 
+    def __init__(self, env, episodes=20, critic_lr=0.003, actor_lr=0.0003, 
                  capacity=1000, num_steps=1, replay_start_size=200, 
                  minibatch_size=64, target_update_interval=1, 
                  gamma=0.98, sigma=0.01, tau=0.005):
@@ -16,16 +16,16 @@ class Trainer():
         action_bound = env.action_space.high[0]
 
         critic = Critic(n_obs, n_act)
-        optimizer1 = torch.optim.Adam(critic.parameters(), lr=lr1)
+        critic_optimizer = torch.optim.Adam(critic.parameters(), critic_lr)
         actor = Actor(n_obs, n_act, action_bound)
-        optimizer2 = torch.optim.Adam(actor.parameters(), lr=lr2)
+        actor_optimizer = torch.optim.Adam(actor.parameters(), actor_lr)
         rb = ReplayBuffer(capacity, num_steps)
 
         self.agent = Agent(
             critic=critic, 
-            optimizer1=optimizer1, 
+            critic_optimizer=critic_optimizer, 
             actor=actor,  
-            optimizer2=optimizer2, 
+            actor_optimizer=actor_optimizer, 
             replay_buffer=rb, 
             replay_start_size=replay_start_size, 
             minibatch_size=minibatch_size, 
@@ -40,8 +40,7 @@ class Trainer():
         obs = self.env.reset()
 
         while True:
-            obs_ = torch.FloatTensor(obs)
-            action = self.agent.act(obs_)
+            action = self.agent.act(obs)
             next_obs, reward, done, _ = self.env.step(action)
 
             self.agent.learn(obs, action, reward, next_obs, done)
@@ -58,7 +57,6 @@ class Trainer():
         obs = self.env.reset()
 
         while True:
-            obs = torch.FloatTensor(obs)
             action = self.agent.act(obs)
 
             obs, reward, done, _ = self.env.step(action)
